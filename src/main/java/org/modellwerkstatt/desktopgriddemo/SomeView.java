@@ -14,6 +14,7 @@ import com.vaadin.flow.component.gridpro.GridProVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 import org.modellwerkstatt.desktopgrid.SelectionGrid;
@@ -121,17 +122,18 @@ public class SomeView extends VerticalLayout {
         col.setHeader(litPropName);
         col.setResizable(true);
 
-        litPropName = "value";
-        template = "<span style=\"${item." + litPropName + "Style}\">${item." + litPropName + "}</span>";
 
-        col = grid.addColumn(LitRenderer.<SomeDto>of(template).
-                withProperty(litPropName, item -> {
-                    return item.value;
-                }).
-                withProperty(litPropName + "Style", item -> {
-                    return "";
-                }));
-        col.setHeader(litPropName);
+        EditColumnConfigurator<SomeDto> editableCol = grid.addEditColumn(item -> item.value );
+        editableCol.text((item, newValue) ->
+        {
+            try {
+                item.value = new BigDecimal(newValue);
+            } catch (Exception e) {
+                Notification.show("Text not accepted! " + e.getMessage(), 4000, Notification.Position.TOP_END);
+            }
+        });
+        col = editableCol.getColumn();
+        col.setHeader("value");
         col.setResizable(true);
     }
 
@@ -140,7 +142,7 @@ public class SomeView extends VerticalLayout {
         List<SomeDto> result = new ArrayList<>();
 
         for (int i = 0; i < amount; i++) {
-            result.add(new SomeDto(i, "Position " + i, "Article 0", new BigDecimal(0.2 * i)));
+            result.add(new SomeDto(i, "Position " + i, "Article 0", BigDecimal.valueOf(i).multiply(new BigDecimal("0.2"))));
         }
 
         return result;
