@@ -10,9 +10,21 @@ version '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
     maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url "https://maven.vaadin.com/vaadin-addons" }
 }
 
 dependencies {
+    implementation enforcedPlatform("com.vaadin:vaadin-bom:$vaadinVersion")
+
+    // Vaadin
+    implementation("com.vaadin:vaadin")
+    providedCompile "javax.servlet:javax.servlet-api:3.1.0"
+
+    // logging
+    // currently we are logging through the SLF4J API to SLF4J-Simple. See src/main/resources/simplelogger.properties file for the logger configuration
+    implementation "org.slf4j:slf4j-simple:1.7.30"
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
@@ -27,4 +39,7 @@ test {
     useJUnitPlatform()
 }
 
+war {
+    archiveName = "desktopgrid.war"
+}
 
