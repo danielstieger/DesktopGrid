@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'com.vaadin'
+    id 'war'
+}
+
+group 'org.modellwerkstatt'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+vaadin {
+    pnpmEnable = false
+    optimizeBundle = true
+    productionMode = true
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
