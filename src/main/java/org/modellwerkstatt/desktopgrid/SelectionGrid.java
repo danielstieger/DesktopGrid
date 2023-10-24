@@ -20,9 +20,7 @@ package org.modellwerkstatt.desktopgrid;
  * #L%
  */
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.ClientCallable;
-import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
@@ -30,6 +28,7 @@ import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.data.provider.DataCommunicator;
+import elemental.json.JsonObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,12 +41,16 @@ import java.util.stream.Stream;
 @SuppressWarnings("unchecked")
 @Tag("vaadin-selection-grid")
 @CssImport(value = "./styles/grid.css", themeFor = "vaadin-selection-grid")
+@CssImport("./styles/gridglobal.css")
 @JsModule("./src/vcf-selection-grid.js")
 @JsModule("./src/selection-grid.js")
+@JsModule("./src/desktop-grid.js")
 public class SelectionGrid<T> extends GridPro<T> {
     private Method dataCommunicatorFetchFromProvider;
     private Method dataCommunicatorGetDataProviderSize;
     private Method columnGetInternalId;
+
+    private ShortcutRegistration gridEscShortCut;
 
 
     /**
@@ -55,7 +58,7 @@ public class SelectionGrid<T> extends GridPro<T> {
      */
     public SelectionGrid() {
         super();
-        reflectMethods();
+        setupGrid();
     }
 
     /**
@@ -64,7 +67,7 @@ public class SelectionGrid<T> extends GridPro<T> {
      */
     public SelectionGrid(int pageSize) {
         super(pageSize);
-        reflectMethods();
+        setupGrid();
     }
 
     /**
@@ -83,7 +86,7 @@ public class SelectionGrid<T> extends GridPro<T> {
      */
     public SelectionGrid(Class<T> beanType) {
         super(beanType);
-        reflectMethods();
+        setupGrid();
     }
 
 
@@ -92,20 +95,29 @@ public class SelectionGrid<T> extends GridPro<T> {
         this.hideMultiSelectionColumn();
     }
 
-    /**
-     * Runs a JavaScript snippet to hide the multi selection / checkbox column on the client side. The column
-     * is not removed, but set to "hidden" explicitly.
-     */
-    public void hideMultiSelectionColumn() {
-        getElement().getNode().runWhenAttached(ui ->
-                ui.beforeClientResponse(this, context ->
-                        getElement().executeJs(
-                                "if (this.querySelector('vaadin-grid-flow-selection-column')) {" +
-                                        " this.querySelector('vaadin-grid-flow-selection-column').hidden = true }")));
+    @Override
+    public void focus() {
+        this.getElement().executeJs(
+                "modellwerkstatt_desktopgrid.focusGrid($0)",
+                this.getElement());
     }
 
+    public int getRowToSelectWhileEdit(JsonObject data) {
+        JsonObject details = data.getObject("event.detail.item");
+        String key = details.getString("key");
+        boolean selected = details.hasKey("selected") && details.getBoolean("selected");
+        return selected ? -1 : Integer.parseInt(key);
+    }
 
-    private void reflectMethods() {
+    public void enableGlobalEsc() {
+        gridEscShortCut.setEventPropagationAllowed(true);
+    }
+
+    public void disableGlobalEsc() {
+        gridEscShortCut.setEventPropagationAllowed(false);
+    }
+
+    private void setupGrid() {
         try {
             dataCommunicatorFetchFromProvider = DataCommunicator.class.getDeclaredMethod("fetchFromProvider", int.class, int.class);
             dataCommunicatorFetchFromProvider.setAccessible(true);
@@ -121,8 +133,24 @@ public class SelectionGrid<T> extends GridPro<T> {
             throw new RuntimeException(e);
         }
 
+        gridEscShortCut = Shortcuts.addShortcutListener(this, e -> {
+            //
+        }, Key.ESCAPE).listenOn(this);
+        enableGlobalEsc();
     }
 
+
+    /**
+     * Runs a JavaScript snippet to hide the multi selection / checkbox column on the client side. The column
+     * is not removed, but set to "hidden" explicitly.
+     */
+    public void hideMultiSelectionColumn() {
+        getElement().getNode().runWhenAttached(ui ->
+                ui.beforeClientResponse(this, context ->
+                        getElement().executeJs(
+                                "if (this.querySelector('vaadin-grid-flow-selection-column')) {" +
+                                        " this.querySelector('vaadin-grid-flow-selection-column').hidden = true }")));
+    }
 
     @Override
     public void scrollToIndex(int rowIndex) {

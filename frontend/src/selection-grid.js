@@ -37,6 +37,25 @@ customElements.whenDefined("vaadin-selection-grid").then(() => {
             boundOnConextMenuHandler(e);
         }
 
+        const oldStopEdit = Grid.prototype._stopEdit;
+        Grid.prototype._stopEdit = function _onStopEdit(shouldCancel, shouldRestoreFocus) {
+
+            const boundOldStopEdit = oldStopEdit.bind(this);
+            boundOldStopEdit(shouldCancel, shouldRestoreFocus);
+
+            this.dispatchEvent(
+              new CustomEvent('cell-edit-stopped', {
+                detail: {
+                  cancel: shouldCancel,
+                  restoreFocus: shouldRestoreFocus,
+                },
+                bubbles: true,
+                cancelable: true,
+                composed: true,
+              }),
+            );
+        }
+
 
         const oldClickHandler = Grid.prototype._onClick;
         Grid.prototype._onClick = function _click(e) {

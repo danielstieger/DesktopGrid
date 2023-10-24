@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.gridpro.EditColumnConfigurator;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.gridpro.GridProVariant;
@@ -33,7 +34,7 @@ public class SomeView extends VerticalLayout {
     private SelectionGridDataView<SomeDto> dataView;
     private SelectionGrid<SomeDto> grid;
     private GridMultiSelectionModel<SomeDto> selectionModel;
-    private ShortcutRegistration escShortCut;
+
 
     public SomeView() {
         this.setSizeFull();
@@ -52,17 +53,43 @@ public class SomeView extends VerticalLayout {
         selectionModel.updateSelection(collectionAsSet, Collections.emptySet());
 
 
+        /* Solved: onContextMenu() does the selection */
+        GridContextMenu<SomeDto> contextMenu = new GridContextMenu<>(grid);
+        contextMenu.addItem("Context menu test", event -> { Notification.show("You clicked the context menu.", 5000, Notification.Position.TOP_CENTER); });
 
-        /* set up cancel button and shortcut on this layout*/
+
+
+        grid.getElement().addEventListener("cell-edit-started", e -> {
+            grid.disableGlobalEsc();
+
+            int idx = grid.getRowToSelectWhileEdit(e.getEventData());
+            if (idx > 0) {
+                grid.deselectAll();
+                grid.select(dataView.getItem(idx - 1));
+            }
+        });
+
+
+        /* Open: grid.getEditor().addCancelListener() is not working. */
+        grid.getElement().addEventListener("cell-edit-stopped", e -> {
+            grid.enableGlobalEsc();
+        });
+
+
+        /* Open: The cell is editable, but visualization is not correct */
+        grid.focus();
+
+
+
         Button cancelButton = new Button("ESC", e -> {
             Notification.show("You clicked the esc button.", 5000, Notification.Position.TOP_CENTER);
         });
-        escShortCut = Shortcuts.addShortcutListener(this, () -> {
+
+        ShortcutRegistration btnShortcut = Shortcuts.addShortcutListener(this, () -> {
             Notification.show("You triggered the esc button by HK.", 5000, Notification.Position.TOP_CENTER);
         }, Key.ESCAPE);
-
-        escShortCut.setEventPropagationAllowed(false);
-        escShortCut.setBrowserDefaultAllowed(false);
+        btnShortcut.setEventPropagationAllowed(false);
+        btnShortcut.setBrowserDefaultAllowed(false);
 
         this.add(cancelButton);
     }
