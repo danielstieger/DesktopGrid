@@ -19,7 +19,6 @@
   background-color: rgb(245, 248, 253);
 }
 
-
 :host([theme~="dense"]) {
   font-size: var(--lumo-font-size-xs);
 }
@@ -31,4 +30,13 @@
   [part~="cell"]:not([part~="details-cell"]) {
   border-top: 0;
   min-height: calc(var(--lumo-size-xs) - var(--_lumo-grid-border-width));
+}
+
+:host(.editable-custom-effect) [part~="editable-cell"]:hover,
+:host(.editable-custom-effect) [part~="editable-cell"]:focus {
+  background: var(--lumo-contrast-30pct);
+}
+
+:host(.editable-custom-effect) [part~="editable-cell"] {
+  background: var(--lumo-contrast-10pct);
 }

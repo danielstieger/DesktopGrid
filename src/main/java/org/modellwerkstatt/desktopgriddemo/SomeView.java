@@ -35,27 +35,33 @@ public class SomeView extends VerticalLayout {
     private SelectionGrid<SomeDto> grid;
     private GridMultiSelectionModel<SomeDto> selectionModel;
 
+    /* Open: GridPro/SelectionGrid speed improvements, mitigate round-tripping? */
+
 
     public SomeView() {
+        /* Open: Should i rename the component SelectionGrid to DesktopGrid */
         this.setSizeFull();
 
+        /* Open: LUMO_HIGHLIGHT_EDITABLE_CELLS not working, although present in gridglobal.css */
         configureGrid();
         grid.setSizeFull();
         this.add(grid);
 
+
+        /* Solved: I assume using grid.setItems() is ressource optimal here */
         List<SomeDto> allData = createData(100);
         List<SomeDto> selection = allData.subList(10, 15);
         boolean selectionInData = dataView.setNewList(grid, allData, selection);
 
-
+        /* Solved: selection via list is not possible, right? */
         LinkedHashSet<SomeDto> collectionAsSet = new LinkedHashSet<>(selection);
         selectionModel.deselectAll();
         selectionModel.updateSelection(collectionAsSet, Collections.emptySet());
 
 
         /* Solved: onContextMenu() does the selection */
-        GridContextMenu<SomeDto> contextMenu = new GridContextMenu<>(grid);
-        contextMenu.addItem("Context menu test", event -> { Notification.show("You clicked the context menu.", 5000, Notification.Position.TOP_CENTER); });
+        //GridContextMenu<SomeDto> contextMenu = new GridContextMenu<>(grid);
+        //contextMenu.addItem("Context menu test", event -> { Notification.show("You clicked the context menu.", 5000, Notification.Position.TOP_CENTER); });
 
 
 
@@ -70,7 +76,7 @@ public class SomeView extends VerticalLayout {
         });
 
 
-        /* Open: grid.getEditor().addCancelListener() is not working. */
+        // Open: grid.getEditor().addCancelListener() is not working.
         grid.getElement().addEventListener("cell-edit-stopped", e -> {
             grid.enableGlobalEsc();
         });

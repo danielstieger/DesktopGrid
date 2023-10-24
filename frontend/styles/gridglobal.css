@@ -1,12 +1,3 @@
 vaadin-grid-pro-edit-text-field[theme~='grid-pro-editor'] {
   --lumo-text-field-size: 1rem !important;
 }
-
-vaadin-selection-grid.editable-custom-effect::part(editable-cell):hover,
-vaadin-selection-grid.editable-custom-effect::part(editable-cell focused-cell) {
-  background: var(--lumo-contrast-60pct);
-}
-
-vaadin-selection-grid.editable-custom-effect::part(editable-cell) {
-  background: var(--lumo-contrast-80pct);
-}

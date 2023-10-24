@@ -51,7 +51,7 @@ export function _selectionGridSelectRowWithItem(e, item, index) {
 
     // if ctrl click
     // TODO: Why double update this? Dan added an else if
-    else if (e.shiftKey && this.rangeSelectRowFrom >= 0) {
+    if (e.shiftKey && this.rangeSelectRowFrom >= 0) {
         if((this.rangeSelectRowFrom - index) !== 0) { // clear text selection, if multiple rows are selected using shift
             const sel = window.getSelection ? window.getSelection() : document.selection;
             if (sel) {
