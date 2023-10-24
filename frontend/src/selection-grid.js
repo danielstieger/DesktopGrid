@@ -21,6 +21,8 @@ customElements.whenDefined("vaadin-selection-grid").then(() => {
     const Grid = customElements.get("vaadin-selection-grid");
     if (Grid) {
 
+        // TODO: codesmell - use bind or attach it to the Grid component? but not both...
+
         const oldOnContextMenuHandler = Grid.prototype._onContextMenu;
         Grid.prototype._onContextMenu = function _onContextMenu(e) {
 

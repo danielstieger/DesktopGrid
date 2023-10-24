@@ -35,7 +35,14 @@ public class SomeView extends VerticalLayout {
     private SelectionGrid<SomeDto> grid;
     private GridMultiSelectionModel<SomeDto> selectionModel;
 
-    /* Open: GridPro/SelectionGrid speed improvements, mitigate round-tripping? */
+    /* Solved: Why not https://rap.eclipsesource.com/demo/release/rapdemo/#tableviewer
+     * Fast Desktop-Style Table ..
+     */
+
+    /* Open: GridPro/SelectionGrid speed improvements, mitigate round-tripping?
+     *       js: in which cases is this.$server undefined?
+     *
+     */
 
 
     public SomeView() {
@@ -50,7 +57,7 @@ public class SomeView extends VerticalLayout {
 
         /* Solved: I assume using grid.setItems() is ressource optimal here */
         List<SomeDto> allData = createData(100);
-        List<SomeDto> selection = allData.subList(10, 15);
+        List<SomeDto> selection = allData.subList(5, 6);
         boolean selectionInData = dataView.setNewList(grid, allData, selection);
 
         /* Solved: selection via list is not possible, right? */
@@ -60,11 +67,11 @@ public class SomeView extends VerticalLayout {
 
 
         /* Solved: onContextMenu() does the selection */
-        //GridContextMenu<SomeDto> contextMenu = new GridContextMenu<>(grid);
-        //contextMenu.addItem("Context menu test", event -> { Notification.show("You clicked the context menu.", 5000, Notification.Position.TOP_CENTER); });
+        GridContextMenu<SomeDto> contextMenu = new GridContextMenu<>(grid);
+        contextMenu.addItem("Context menu test", event -> { Notification.show("You clicked the context menu.", 5000, Notification.Position.TOP_CENTER); });
 
 
-
+        // Solved: select next item on enter / shift-tab
         grid.getElement().addEventListener("cell-edit-started", e -> {
             grid.disableGlobalEsc();
 
@@ -82,11 +89,14 @@ public class SomeView extends VerticalLayout {
         });
 
 
-        /* Open: The cell is editable, but visualization is not correct */
+        /* Open: The cell is editable, but visualization is not correct
+         * Open: scrolling not activated?
+         *
+         */
         grid.focus();
 
 
-
+        /* Open: how to do validation in editable columns, check text() below */
         Button cancelButton = new Button("ESC", e -> {
             Notification.show("You clicked the esc button.", 5000, Notification.Position.TOP_CENTER);
         });
