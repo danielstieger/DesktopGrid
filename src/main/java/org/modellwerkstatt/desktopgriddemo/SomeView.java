@@ -15,12 +15,10 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 import org.modellwerkstatt.desktopgrid.SelectionGrid;
 import org.modellwerkstatt.desktopgrid.SelectionGridDataView;
+import org.modellwerkstatt.desktopgrid.Util;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 @Route("/demo/")
 public class SomeView extends VerticalLayout {
@@ -52,7 +50,9 @@ public class SomeView extends VerticalLayout {
 
         /* Solved: I assume using grid.setItems() is ressource optimal here */
         List<SomeDto> allData = createData(100);
-        List<SomeDto> selection = allData.subList(50, 51);
+
+        /* Solved: Selection from 0 not working */
+        List<SomeDto> selection = allData.subList(0, 1);
         boolean selectionInData = dataView.setNewList(grid, allData, selection);
 
         /* Solved: selection via list is not possible, right? */
@@ -85,13 +85,18 @@ public class SomeView extends VerticalLayout {
 
 
         /* Open: The cell is editable, but visualization is not correct
+         * Open: The focusOnCell() is jumping
          *
          */
-        grid.scrollToIndex(49);
-        grid.focusOnCell(dataView.getItem(50), grid.getColumns().get(2));
+
+        Optional<SomeDto> selectedFirst = selectionModel.getFirstSelectedItem();
+        grid.scrollToIndex(dataView.getIndex(selectedFirst.get()));
+        grid.focusOnCell(selectedFirst.get(), grid.getColumns().get(0));
 
 
         /* Open: how to do validation in editable columns, check text() below */
+
+
         Button cancelButton = new Button("ESC", e -> {
             Notification.show("You clicked the esc button.", 5000, Notification.Position.TOP_CENTER);
         });
@@ -117,9 +122,8 @@ public class SomeView extends VerticalLayout {
         grid.setThemeName("dense");
 
         selectionModel = (GridMultiSelectionModel<SomeDto>) grid.getSelectionModel();
-        selectionModel.setSelectionColumnFrozen(true);
 
-        // posnum
+        // column posnum
         Grid.Column<SomeDto> col;
         String litPropName = "posNum";
         String template = "<span style=\"${item." + litPropName + "Style}\">${item." + litPropName + "}</span>";
@@ -134,6 +138,7 @@ public class SomeView extends VerticalLayout {
         col.setHeader(litPropName);
         col.setResizable(true);
 
+        // column name
         litPropName = "name";
         template = "<span style=\"${item." + litPropName + "Style}\">${item." + litPropName + "}</span>";
 
@@ -147,6 +152,7 @@ public class SomeView extends VerticalLayout {
         col.setHeader(litPropName);
         col.setResizable(true);
 
+        // column article
         litPropName = "article";
         template = "<span style=\"${item." + litPropName + "Style}\">${item." + litPropName + "}</span>";
 
@@ -160,7 +166,7 @@ public class SomeView extends VerticalLayout {
         col.setHeader(litPropName);
         col.setResizable(true);
 
-
+        // editable column value
         EditColumnConfigurator<SomeDto> editableCol = grid.addEditColumn(item -> item.value );
         editableCol.text((item, newValue) ->
         {

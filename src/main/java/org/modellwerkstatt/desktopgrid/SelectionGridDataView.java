@@ -108,5 +108,13 @@ public class SelectionGridDataView<DTO> {
     public DTO getItem(int index) {
         return filteredList.get(index);
     }
+
+    public int getIndex(DTO item) {
+        return filteredList.indexOf(item);
+    }
+
+    public List<DTO> getFilteredList() {
+        return filteredList;
+    }
 }
 
