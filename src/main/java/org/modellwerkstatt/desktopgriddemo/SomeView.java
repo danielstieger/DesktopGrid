@@ -57,7 +57,7 @@ public class SomeView extends VerticalLayout {
 
         /* Solved: I assume using grid.setItems() is ressource optimal here */
         List<SomeDto> allData = createData(100);
-        List<SomeDto> selection = allData.subList(5, 6);
+        List<SomeDto> selection = allData.subList(50, 51);
         boolean selectionInData = dataView.setNewList(grid, allData, selection);
 
         /* Solved: selection via list is not possible, right? */
@@ -90,10 +90,10 @@ public class SomeView extends VerticalLayout {
 
 
         /* Open: The cell is editable, but visualization is not correct
-         * Open: scrolling not activated?
          *
          */
-        grid.focus();
+        grid.scrollToIndex(49);
+        grid.focusOnCell(dataView.getItem(50), grid.getColumns().get(2));
 
 
         /* Open: how to do validation in editable columns, check text() below */
