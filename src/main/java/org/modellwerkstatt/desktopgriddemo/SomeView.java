@@ -34,12 +34,12 @@ public class SomeView extends VerticalLayout {
 
     /* Open: GridPro/SelectionGrid speed improvements, mitigate round-tripping?
      *       js: in which cases is this.$server undefined?
-     *
      */
+
+    /* Open: Should i rename the component SelectionGrid to DesktopGrid */
 
 
     public SomeView() {
-        /* Open: Should i rename the component SelectionGrid to DesktopGrid */
         this.setSizeFull();
 
         /* Open: LUMO_HIGHLIGHT_EDITABLE_CELLS not working, although present in gridglobal.css */
@@ -49,9 +49,9 @@ public class SomeView extends VerticalLayout {
 
 
         /* Solved: I assume using grid.setItems() is ressource optimal here */
-        List<SomeDto> allData = createData(100);
+        List<SomeDto> allData = createData(20);
 
-        /* Solved: Selection from 0 not working */
+        /* Solved: Selection from 0 not working - https://github.com/vaadin-component-factory/selection-grid-flow/pull/39 */
         List<SomeDto> selection = allData.subList(0, 1);
         boolean selectionInData = dataView.setNewList(grid, allData, selection);
 
@@ -85,13 +85,15 @@ public class SomeView extends VerticalLayout {
 
 
         /* Open: The cell is editable, but visualization is not correct
-         * Open: The focusOnCell() is jumping
+         *       OR: how could i get the cell into edit mode?
          *
+         * Open: The focusOnCell() is jumping when setting the selection to 1
+         *       and the content is short (e.g. 20 items)
          */
 
         Optional<SomeDto> selectedFirst = selectionModel.getFirstSelectedItem();
         grid.scrollToIndex(dataView.getIndex(selectedFirst.get()));
-        grid.focusOnCell(selectedFirst.get(), grid.getColumns().get(0));
+        grid.focusOnCell(selectedFirst.get(), grid.getColumns().get(3));
 
 
         /* Open: how to do validation in editable columns, check text() below */
